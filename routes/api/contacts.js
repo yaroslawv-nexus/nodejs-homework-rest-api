@@ -1,7 +1,7 @@
 import express from 'express'
 import contactsController from '../../controllers/contacts/contacts-controller.js';
-import isEmptyBody from '../../middlewares/isEmptyBody.js';
-import { contactAddSchema, contactUpdateSchema } from '../../schemas/contact-schema.js';
+import {isEmptyBody, isValidId} from '../../middlewares/index.js';
+import { contactAddSchema, contactUpdateSchema, contactFavoriteSchema } from '../../models/Contact.js';
 import validateWrapper from '../../decorators/validateWrapper.js';
 
 
@@ -9,13 +9,17 @@ import validateWrapper from '../../decorators/validateWrapper.js';
 
 router.get('/', contactsController.getAllContacts);
 
-router.get('/:contactId', contactsController.getContactById);
+router.get('/:contactId', isValidId, contactsController.getContactById);
 
-router.post('/', isEmptyBody, validateWrapper(contactAddSchema) , contactsController.addContact);
+router.post('/', isEmptyBody,validateWrapper(contactAddSchema), contactsController.addContact);
 
-router.put('/:contactId', isEmptyBody,validateWrapper(contactUpdateSchema), contactsController.updateContactById);
+router.put('/:contactId', isValidId, isEmptyBody, validateWrapper(contactUpdateSchema), contactsController.updateContactById);
 
-router.delete('/:contactId' , contactsController.deleteContactById);
+router.patch('/:contactId/favorite', isValidId, isEmptyBody, validateWrapper(contactFavoriteSchema), contactsController.updateContactById);
+
+router.delete('/:contactId', isValidId, contactsController.deleteContactById);
+
+
 
 
 
