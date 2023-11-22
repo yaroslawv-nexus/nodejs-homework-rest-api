@@ -1,19 +1,20 @@
 
-import * as contactsService from "../../models/contacts.js";
 import { HttpError } from "../../helpers/index.js"
 import tryCatchWrapper from "../../decorators/tryCatchWrapper.js";
+import Contact from "../../models/Contact.js";
+
 
 
 
 
 const getAllContacts = async (req, res, next) => {
-        const result = await contactsService.listContacts();
+        const result = await Contact.find();
         res.json(result);
 };
 
 const getContactById = async (req, res, next) => {
     const { contactId } = req.params;
-    const result = await contactsService.getContactsById(contactId);
+    const result = await Contact.findById(contactId);
       if (!result) {
         throw HttpError(404, `Contact with id ${contactId} not found`);
       }
@@ -21,14 +22,13 @@ const getContactById = async (req, res, next) => {
 }
 
 const addContact = async (req, res, next) => {
-    const { name, email, phone } = req.body;
-    const result = await contactsService.addContact(name, email, phone);
+    const result = await Contact.create(req.body);
     res.status(201).json(result);
 }
 
 const updateContactById = async (req, res, next) => {
     const { contactId } = req.params;
-    const result = await contactsService.updateContact(contactId, req.body);
+    const result = await Contact.findByIdAndUpdate(contactId, req.body);
     if (!result) {
         throw HttpError(404, `Contact with id ${contactId} not found`);
     }
@@ -38,7 +38,7 @@ const updateContactById = async (req, res, next) => {
 
 const deleteContactById = async (req, res, next) => {
     const { contactId } = req.params;
-    const result = await contactsService.removeContactById(contactId);
+    const result = await Contact.findByIdAndDelete(contactId);
       if (!result) {
         throw HttpError(404, `Contact with id ${contactId} not found`);
       }
@@ -46,12 +46,22 @@ const deleteContactById = async (req, res, next) => {
  
 }
 
-tryCatchWrapper(deleteContactById)
+const updateFavorite = async (req, res, next) => {
+   const { contactId } = req.params;
+    const result = await Contact.findByIdAndUpdate(contactId, req.body);
+    if (!result) {
+        throw HttpError(404, `Contact with id ${contactId} not found`);
+    }
+    res.json(result);
+ 
+}
+
 
 export default {
   getAllContacts: tryCatchWrapper(getAllContacts),
   getContactById: tryCatchWrapper(getContactById),
   addContact: tryCatchWrapper(addContact),
   updateContactById: tryCatchWrapper(updateContactById),
-  deleteContactById: tryCatchWrapper(deleteContactById)
+  deleteContactById: tryCatchWrapper(deleteContactById),
+  updateFavorite: tryCatchWrapper(updateFavorite)
 }
