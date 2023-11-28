@@ -22,7 +22,10 @@ password: {
     enum: ["starter", "pro", "business"],
     default: "starter"
   },
-  token: String
+  token: {
+    type: String,
+  }
+
 }, { versionKey: false, timestamps: true })
 
 userSchema.post("save", handleSaveError);
@@ -37,6 +40,10 @@ export const signupSchema = Joi.object({
 export const signinSchema = Joi.object({
     email: Joi.string().pattern(emailRegexp).required(),
     password: Joi.string().min(6).required(),
+})
+
+export const updateSubscribeSchema = Joi.object({
+    subscription: Joi.string().valid("starter", "pro", "business").required(),
 })
 
 const User = model("user", userSchema);
