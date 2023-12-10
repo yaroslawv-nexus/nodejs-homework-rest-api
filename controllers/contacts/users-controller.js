@@ -20,22 +20,23 @@ const updateSubscribe = async (req, res) => {
 const updateAvatar = async (req, res) => {
  
     const { _id } = req.user;
-    const { path: oldPath, filename } = req.file;
-    const img = await Jimp.read(oldPath)
-  .then((lenna) => {
-    return lenna
-      .resize(250, 250) // resize
-  })
-  .catch((err) => {
-    console.error(err);
-  });
+  const { path: oldPath, filename } = req.file;
+  try {
+    const originalImage  = await Jimp.read(oldPath);
+    const resizedImage = originalImage.clone().resize(250, 250);
+    await resizedImage.writeAsync(oldPath);
+    
     const newPath = path.join(avatarsPath, filename);
     await fs.rename(oldPath, newPath);
     const avatarURL = path.join("avatars", filename);
-    const updateUser = await User.findByIdAndUpdate(_id, {avatarURL});
-    res.status(200).json({   
-        email: updateUser.avatarURL   
+
+    const updateUser = await User.findByIdAndUpdate(_id, { avatarURL });
+    res.status(200).json({
+      email: updateUser.avatarURL
     })
+  } catch (e) {
+    res.status(500).json({ error: 'Помилка при оновленні аватара' });
+  }
     
 }
 
