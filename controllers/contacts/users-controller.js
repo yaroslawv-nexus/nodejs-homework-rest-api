@@ -18,8 +18,11 @@ const updateSubscribe = async (req, res) => {
 }
 
 const updateAvatar = async (req, res) => {
- 
-    const { _id } = req.user;
+  if (!req.file) {
+    throw HttpError(400, "Image undefined");
+  }
+
+  const { _id } = req.user;
   const { path: oldPath, filename } = req.file;
   try {
     const originalImage  = await Jimp.read(oldPath);
@@ -32,7 +35,7 @@ const updateAvatar = async (req, res) => {
 
     const updateUser = await User.findByIdAndUpdate(_id, { avatarURL });
     res.status(200).json({
-      email: updateUser.avatarURL
+      avatarURL: updateUser.avatarURL
     })
   } catch (e) {
     res.status(500).json({ error: 'Помилка при оновленні аватара' });
