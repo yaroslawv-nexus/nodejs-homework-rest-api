@@ -25,7 +25,7 @@ userRouter.patch('/avatars', authenticate, upload.single("avatar"), usersControl
 
 userRouter.get(`/verify/:verificationToken`, usersController.verify);
 
-userRouter.post(`/verify/:verificationToken`, isEmptyBody, validateWrapper(userEmailSchema), usersController.sendVerify);
+userRouter.post(`/verify`, isEmptyBody, validateWrapper(userEmailSchema), usersController.sendVerify);
 
 
 
