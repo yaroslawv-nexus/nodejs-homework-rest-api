@@ -1,10 +1,12 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import gravatar from "gravatar";
 
 import User from "../../models/User.js";
 import { HttpError } from "../../helpers/index.js"
 import tryCatchWrapper from "../../decorators/tryCatchWrapper.js";
 import "dotenv/config.js";
+
 
 
 
@@ -17,8 +19,9 @@ const signup = async (req, res) => {
     if (user) { 
         throw HttpError(409, "Email already exist");
     }
+    const avatarURL = gravatar.url(email);
     const hashPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({...req.body, password: hashPassword});
+    const newUser = await User.create({...req.body, password: hashPassword, avatarURL});
 
     res.status(201).json({
         email: newUser.email,
