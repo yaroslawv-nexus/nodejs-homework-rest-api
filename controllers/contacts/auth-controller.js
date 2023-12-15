@@ -3,14 +3,15 @@ import jwt from "jsonwebtoken";
 import gravatar from "gravatar";
 
 import User from "../../models/User.js";
-import { HttpError } from "../../helpers/index.js"
+import { HttpError, sendEmail } from "../../helpers/index.js"
 import tryCatchWrapper from "../../decorators/tryCatchWrapper.js";
 import "dotenv/config.js";
+import { nanoid } from "nanoid";
 
 
 
 
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET, BASE_URL } = process.env;
 
 const signup = async (req, res) => {
     
@@ -21,7 +22,16 @@ const signup = async (req, res) => {
     }
     const avatarURL = gravatar.url(email);
     const hashPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({...req.body, password: hashPassword, avatarURL});
+    const verificationToken = nanoid();
+
+    const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL, verificationToken });
+    const verifyEmail = {
+        to: email,
+        subject: "Verify email",
+        html: `<a target="_blank" href="${BASE_URL}/api/auth/verify/${verificationToken}">Click verify email</a>`
+    }
+
+    await sendEmail(verifyEmail);
 
     res.status(201).json({
         email: newUser.email,
@@ -34,6 +44,11 @@ const signin = async (req, res) => {
     if (!user) { 
         throw HttpError(409, "Email or password invalid");
     }
+
+    if (!user.verify) {
+        throw HttpError(401, "Email not verify");
+    }
+
     const passwordCompare = await bcrypt.compare(password, user.password);
 
     if (!passwordCompare) {

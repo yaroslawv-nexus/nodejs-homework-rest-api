@@ -7,13 +7,13 @@ const emailRegexp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 
 const userSchema = new Schema({
-password: {
+  password: {
     type: String,
     required: [true, 'Set password for user'],
   },
   email: {
-      type: String,
-      match: emailRegexp,
+    type: String,
+    match: emailRegexp,
     required: [true, 'Email is required'],
     unique: true,
   },
@@ -27,6 +27,14 @@ password: {
   },
   token: {
     type: String,
+  },
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+    required: [true, 'Verify token is required'],
   }
 
 }, { versionKey: false, timestamps: true })
@@ -48,6 +56,11 @@ export const signinSchema = Joi.object({
 export const updateSubscribeSchema = Joi.object({
     subscription: Joi.string().valid("starter", "pro", "business").required(),
 })
+
+export const userEmailSchema = Joi.object({
+  email: Joi.string().pattern(emailRegexp).required(),
+})
+
 
 const User = model("user", userSchema);
 
