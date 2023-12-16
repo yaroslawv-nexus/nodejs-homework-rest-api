@@ -4,9 +4,12 @@ import Jimp from "jimp";
 import { HttpError, sendEmail } from "../../helpers/index.js"
 import tryCatchWrapper from "../../decorators/tryCatchWrapper.js";
 import User from "../../models/User.js";
+import "dotenv/config.js";
 
 
 const avatarsPath = path.resolve("public", "avatars");
+
+const { BASE_URL } = process.env;
 
 const updateSubscribe = async (req, res) => {
     const { _id } = req.user;
@@ -45,13 +48,14 @@ const updateAvatar = async (req, res) => {
 
 const verify = async (req, res) => { 
   const { verificationToken } = req.params;
-
+  console.log(verificationToken);
   const user = await User.findOne({ verificationToken });
+  console.log(user);
   if (!user) {
     throw HttpError(401, "Email not found")
   }
 
-  await User.findByIdAndUpdate(user._id, { verify: true, verificationToken: "" });
+  await User.findByIdAndUpdate(user._id, { verify: true, verificationToken: "null" });
 
   res.json({
    message: "Email verify success",
@@ -66,14 +70,17 @@ const sendVerify = async (req, res) => {
   if (!user) {
     throw HttpError(401, "Email not found")
   }
+
   if (user.verify) {
     throw HttpError(400, "Verification has already been passed")
   }
 
+  const { verificationToken } = user;
+
   const verifyEmail = {
         to: email,
         subject: "Verify email",
-        html: `<a target="_blank" href="${BASE_URL}/api/auth/verify/${verificationToken}">Click verify email</a>`
+        html: `<a target="_blank" href="${BASE_URL}/users/verify/${verificationToken}">Click verify email</a>`
     }
 
   await sendEmail(verifyEmail);
